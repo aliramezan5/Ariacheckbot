@@ -18,6 +18,6 @@ npm run dev
 
 ## انتشار در مخزن موجود
 
-Workflow سطح بالاتر، پوشهٔ `pages` را با `npm ci` و `npm run build` می‌سازد و artifact را با GitHub Pages منتشر می‌کند. Worker ریشهٔ مخزن مستقل می‌ماند.
+Workflow سطح بالاتر، پوشهٔ `pages` را با `npm ci` و `npm run build` می‌سازد و artifact را با GitHub Pages منتشر می‌کند (از بخش Actions به‌صورت دستی اجرا می‌شود). Worker ریشهٔ مخزن مستقل می‌ماند.
 
 اگر اولین اجرای Workflow با پیام `Resource not accessible by integration` متوقف شد، مالک مخزن فقط یک‌بار در مسیر `Settings → Pages → Build and deployment` گزینهٔ `GitHub Actions` را به‌عنوان Source انتخاب کند و Workflow را دوباره اجرا کند.

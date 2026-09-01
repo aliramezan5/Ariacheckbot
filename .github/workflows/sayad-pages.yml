@@ -1,18 +1,12 @@
 name: Deploy Sayad Pasargad Pages
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "pages/**"
-      - ".github/workflows/sayad-pages.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
-  administration: write
 
 concurrency:
   group: "pages"
