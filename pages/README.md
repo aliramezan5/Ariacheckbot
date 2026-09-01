@@ -20,4 +20,4 @@ npm run dev
 
 Workflow سطح بالاتر، پوشهٔ `pages` را با `npm ci` و `npm run build` می‌سازد و artifact را با GitHub Pages منتشر می‌کند (از بخش Actions به‌صورت دستی اجرا می‌شود). Worker ریشهٔ مخزن مستقل می‌ماند.
 
-اگر اولین اجرای Workflow با پیام `Resource not accessible by integration` متوقف شد، مالک مخزن فقط یک‌بار در مسیر `Settings → Pages → Build and deployment` گزینهٔ `GitHub Actions` را به‌عنوان Source انتخاب کند و Workflow را دوباره اجرا کند.
+برای نمایش فوریِ همین build، در مسیر `Settings → Pages → Build and deployment` می‌توان Source را روی `Deploy from a branch`، Branch را روی `main` و Folder را روی `/docs` گذاشت. برای build خودکار، Source را روی `GitHub Actions` بگذارید و Workflow را از بخش Actions دستی اجرا کنید. اگر اولین اجرا با پیام `Resource not accessible by integration` متوقف شد، همین انتخاب Source در Settings را یک‌بار انجام دهید و Workflow را دوباره اجرا کنید.
