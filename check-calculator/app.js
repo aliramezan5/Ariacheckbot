@@ -98,7 +98,21 @@ function getDealMetrics(count, interval) {
   return { duration, ras };
 }
 
-function getAutoRate(principal, ras) {
+function getBuiltInRasAdjustment(ras) {
+  if (ras <= 3) return { adjustment: -0.5, label: 'رأس تا ۳ ماه' };
+  if (ras <= 6) return { adjustment: 0, label: 'رأس ۳ تا ۶ ماه' };
+  if (ras <= 9) return { adjustment: 0.5, label: 'رأس ۶ تا ۹ ماه' };
+  if (ras <= 12) return { adjustment: 1, label: 'رأس ۹ تا ۱۲ ماه' };
+  return { adjustment: 1.5, label: 'رأس بیش از ۱۲ ماه' };
+}
+
+function getIntervalAdjustment(interval) {
+  if (interval >= 6) return { adjustment: 0.5, label: 'فاصله ۶ماهه یا بیشتر' };
+  if (interval >= 3) return { adjustment: 0.25, label: 'فاصله ۳ماهه یا بیشتر' };
+  return { adjustment: 0, label: '' };
+}
+
+function getAutoRate(principal, ras, interval) {
   const base = settings.source === 'investor' ? Number(settings.investorBaseRate) : Number(settings.personalBaseRate);
   let rate = base;
   let reason = settings.source === 'investor' ? 'سرمایه‌گذار' : 'سرمایه شخصی';
@@ -107,12 +121,23 @@ function getAutoRate(principal, ras) {
     .filter(r => Number.isFinite(Number(r.maxRas)))
     .sort((a,b) => Number(a.maxRas) - Number(b.maxRas));
   const rasRule = rasRules.find(r => ras <= Number(r.maxRas));
+
   if (rasRule) {
     const candidate = settings.source === 'investor' ? Number(rasRule.investorRate) : Number(rasRule.personalRate);
     if (Number.isFinite(candidate) && candidate > 0) {
       rate = candidate;
-      reason += ` • رأس تا ${faNumber(Number(rasRule.maxRas),1)} ماه`;
+      reason += ` • قاعده شخصی رأس تا ${faNumber(Number(rasRule.maxRas),1)} ماه`;
     }
+  } else {
+    const builtIn = getBuiltInRasAdjustment(ras);
+    rate += builtIn.adjustment;
+    reason += ` • ${builtIn.label}`;
+  }
+
+  const intervalRisk = getIntervalAdjustment(interval);
+  if (intervalRisk.adjustment) {
+    rate += intervalRisk.adjustment;
+    reason += ` • ${intervalRisk.label} +${faNumber(intervalRisk.adjustment,2)}٪`;
   }
 
   const amountRules = [...settings.amountRules]
@@ -147,7 +172,7 @@ function getCurrentSnapshot() {
   const count = parseNumber(els.count.value);
   const interval = parseNumber(els.interval.value);
   const { duration, ras } = getDealMetrics(count, interval);
-  const auto = getAutoRate(principal, ras);
+  const auto = getAutoRate(principal, ras, interval);
   const rate = settings.rateMode === 'auto' ? auto.rate : parseNumber(els.manualRate.value);
   if (validate(principal, count, interval, rate)) return null;
   const { periodRate, payment } = calculatePayment(principal, count, interval, rate);
@@ -174,7 +199,7 @@ function render() {
   const count = parseNumber(els.count.value);
   const interval = parseNumber(els.interval.value);
   const { duration, ras } = getDealMetrics(Number.isFinite(count) ? count : 0, Number.isFinite(interval) ? interval : 0);
-  const auto = getAutoRate(principal, ras);
+  const auto = getAutoRate(principal, ras, interval);
   const rate = settings.rateMode === 'auto' ? auto.rate : parseNumber(els.manualRate.value);
   const error = validate(principal, count, interval, rate);
 
