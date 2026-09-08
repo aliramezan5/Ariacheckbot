@@ -1,4 +1,4 @@
-const CACHE = 'check-calculator-v4-history';
+const CACHE = 'check-calculator-v5-auto-rate';
 const ASSETS = ['./', './index.html', './styles.css', './app.js', './history.js', './history.css', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', event => {
   self.skipWaiting();
