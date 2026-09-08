@@ -1,13 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#2f80ed"/>
-  <rect x="126" y="92" width="260" height="328" rx="42" fill="white"/>
-  <rect x="166" y="140" width="180" height="72" rx="16" fill="#eaf3ff"/>
-  <g fill="#2f80ed">
-    <rect x="166" y="250" width="46" height="46" rx="12"/>
-    <rect x="233" y="250" width="46" height="46" rx="12"/>
-    <rect x="300" y="250" width="46" height="46" rx="12"/>
-    <rect x="166" y="317" width="46" height="46" rx="12"/>
-    <rect x="233" y="317" width="46" height="46" rx="12"/>
-    <rect x="300" y="317" width="46" height="46" rx="12"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b1728"/><stop offset="1" stop-color="#07101d"/></linearGradient>
+    <linearGradient id="wave" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#27d5ed"/><stop offset=".5" stop-color="#328bff"/><stop offset="1" stop-color="#8058ff"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="14" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <rect x="45" y="45" width="422" height="422" rx="92" fill="none" stroke="#7fa4d7" stroke-opacity=".16" stroke-width="4"/>
+  <g filter="url(#glow)" fill="url(#wave)">
+    <rect x="142" y="222" width="22" height="68" rx="11"/>
+    <rect x="182" y="184" width="22" height="144" rx="11"/>
+    <rect x="222" y="135" width="22" height="242" rx="11"/>
+    <rect x="262" y="174" width="22" height="164" rx="11"/>
+    <rect x="302" y="205" width="22" height="102" rx="11"/>
+    <rect x="342" y="232" width="22" height="48" rx="11"/>
   </g>
 </svg>
