@@ -15,9 +15,12 @@
 <body>
   <main class="app" aria-label="ماشین حساب چک اقساطی">
     <header class="header">
-      <h1>محاسبه مبلغ چک</h1>
-      <p>کاهش مانده با سود مرکب</p>
-      <span class="rate">نرخ ماهانه: ۷٪</span>
+      <button id="settingsOpen" class="icon-btn" type="button" aria-label="تنظیمات">⚙︎</button>
+      <div>
+        <h1>محاسبه مبلغ چک</h1>
+        <p>کاهش مانده با سود مرکب</p>
+      </div>
+      <span class="header-spacer" aria-hidden="true"></span>
     </header>
 
     <section class="form-card" aria-label="ورودی معامله">
@@ -29,21 +32,61 @@
         </div>
       </label>
 
-      <label class="field">
-        <span>تعداد چک‌ها</span>
-        <div class="input-wrap compact">
-          <input id="count" inputmode="numeric" autocomplete="off" value="3" aria-label="تعداد چک‌ها" />
-          <b>فقره</b>
-        </div>
-      </label>
+      <div class="two-col">
+        <label class="field">
+          <span>تعداد چک‌ها</span>
+          <div class="input-wrap compact">
+            <input id="count" inputmode="numeric" autocomplete="off" value="3" aria-label="تعداد چک‌ها" />
+            <b>فقره</b>
+          </div>
+        </label>
 
-      <label class="field">
-        <span>فاصله بین هر چک</span>
-        <div class="input-wrap compact">
-          <input id="interval" inputmode="numeric" autocomplete="off" value="2" aria-label="فاصله چک‌ها به ماه" />
-          <b>ماه</b>
+        <label class="field">
+          <span>فاصله هر چک</span>
+          <div class="input-wrap compact">
+            <input id="interval" inputmode="numeric" autocomplete="off" value="2" aria-label="فاصله چک‌ها به ماه" />
+            <b>ماه</b>
+          </div>
+        </label>
+      </div>
+
+      <section class="rate-card" aria-label="نرخ کارمزد">
+        <div class="rate-head">
+          <span>نرخ کارمزد ماهانه</span>
+          <div class="segmented compact-segmented" role="group" aria-label="حالت نرخ">
+            <button type="button" data-rate-mode="auto" class="active">اتومات</button>
+            <button type="button" data-rate-mode="manual">دستی</button>
+          </div>
         </div>
-      </label>
+
+        <div id="autoRatePanel" class="rate-panel">
+          <div class="source-row">
+            <span>منبع پول</span>
+            <div class="segmented" role="group" aria-label="منبع سرمایه">
+              <button type="button" data-source="personal" class="active">شخصی</button>
+              <button type="button" data-source="investor">سرمایه‌گذار</button>
+            </div>
+          </div>
+          <div class="auto-rate-result">
+            <strong id="effectiveRate">۷٪</strong>
+            <span id="rateReason">سرمایه شخصی</span>
+          </div>
+          <div class="deal-metrics">
+            <span>مدت <b id="durationMetric">۶ ماه</b></span>
+            <span>رأس <b id="rasMetric">۴ ماه</b></span>
+          </div>
+        </div>
+
+        <div id="manualRatePanel" class="rate-panel" hidden>
+          <label class="manual-rate-field">
+            <span>نرخ ماهانه</span>
+            <div class="input-wrap compact">
+              <input id="manualRate" inputmode="decimal" value="7" aria-label="نرخ کارمزد ماهانه" />
+              <b>٪</b>
+            </div>
+          </label>
+        </div>
+      </section>
 
       <button id="calculate" type="button">محاسبه</button>
     </section>
@@ -57,28 +100,117 @@
       <button id="copy" type="button" class="copy-btn">کپی مبلغ هر چک</button>
 
       <div class="summary">
-        <div>
-          <span>جمع کل چک‌ها</span>
-          <b id="total">۱٬۵۶۳.۳۹۸ م</b>
-        </div>
-        <div>
-          <span>سود کل</span>
-          <b id="profit">۳۶۳.۳۹۸ م</b>
-        </div>
+        <div><span>جمع کل چک‌ها</span><b id="total">۱٬۵۶۳.۳۹۸ م</b></div>
+        <div><span>سود کل</span><b id="profit">۳۶۳.۳۹۸ م</b></div>
       </div>
     </section>
 
     <section class="schedule-card">
-      <div class="section-title">
+      <button id="scheduleToggle" class="section-title" type="button" aria-expanded="true">
         <h2>برنامه چک‌ها</h2>
         <span id="periodRate">نرخ هر دوره ۱۴.۴۹٪</span>
-      </div>
+      </button>
       <div id="schedule" class="schedule"></div>
     </section>
 
-    <p class="footnote">محاسبه بر مبنای سود مرکب ماهانه ۷٪ و کاهش مانده پس از هر قسط انجام می‌شود.</p>
+    <p class="footnote">محاسبه بر مبنای سود مرکب ماهانه و کاهش مانده پس از هر قسط انجام می‌شود.</p>
     <p id="error" class="error" role="alert" hidden></p>
   </main>
+
+  <div id="settingsOverlay" class="overlay" hidden></div>
+  <aside id="settingsSheet" class="settings-sheet" aria-hidden="true" aria-label="تنظیمات">
+    <div class="sheet-handle"></div>
+    <div class="settings-head">
+      <button id="settingsClose" class="text-btn" type="button">بستن</button>
+      <h2>تنظیمات</h2>
+      <span></span>
+    </div>
+
+    <div class="settings-scroll">
+      <section class="settings-section">
+        <h3>نمایش</h3>
+        <div class="setting-row stacked">
+          <span>تم برنامه</span>
+          <div class="segmented full" role="group" aria-label="تم برنامه">
+            <button type="button" data-theme="light" class="active">روز</button>
+            <button type="button" data-theme="dark">شب</button>
+          </div>
+        </div>
+        <label class="setting-row slider-row">
+          <span>اندازه فونت <b id="fontScaleLabel">۱۰۰٪</b></span>
+          <input id="fontScale" type="range" min="90" max="120" step="5" value="100" />
+        </label>
+        <label class="setting-row slider-row">
+          <span>اندازه برنامه <b id="uiScaleLabel">۱۰۰٪</b></span>
+          <input id="uiScale" type="range" min="90" max="110" step="5" value="100" />
+        </label>
+      </section>
+
+      <section class="settings-section">
+        <h3>نرخ کارمزد</h3>
+        <div class="setting-row stacked">
+          <span>حالت محاسبه نرخ</span>
+          <div class="segmented full" role="group" aria-label="حالت نرخ در تنظیمات">
+            <button type="button" data-settings-rate-mode="auto" class="active">اتومات</button>
+            <button type="button" data-settings-rate-mode="manual">دستی</button>
+          </div>
+        </div>
+
+        <div class="base-rates">
+          <label>
+            <span>سرمایه شخصی</span>
+            <div class="mini-input"><input id="personalBaseRate" inputmode="decimal" value="7" /><b>٪</b></div>
+          </label>
+          <label>
+            <span>سرمایه‌گذار</span>
+            <div class="mini-input"><input id="investorBaseRate" inputmode="decimal" value="5" /><b>٪</b></div>
+          </label>
+        </div>
+        <p class="helper">این دو نرخ پایه قبلاً تعیین شده‌اند. موتور اتومات ابتدا منبع پول را اعمال می‌کند.</p>
+
+        <div class="rules-head">
+          <div>
+            <strong>قواعد اتومات رأس</strong>
+            <span>اختیاری؛ اگر تعریف شوند، نرخ پایه را جایگزین می‌کنند.</span>
+          </div>
+          <button id="addRasRule" class="secondary-btn" type="button">+ قاعده</button>
+        </div>
+        <div id="rasRules" class="rules-list"></div>
+
+        <div class="rules-head amount-rules-head">
+          <div>
+            <strong>قواعد مبلغ معامله</strong>
+            <span>اختیاری؛ برای مبلغ‌های خاص نرخ را تنظیم کن.</span>
+          </div>
+          <button id="addAmountRule" class="secondary-btn" type="button">+ قاعده</button>
+        </div>
+        <div id="amountRules" class="rules-list"></div>
+      </section>
+
+      <button id="resetSettings" class="danger-btn" type="button">بازگشت تنظیمات به حالت اولیه</button>
+    </div>
+  </aside>
+
+  <template id="rasRuleTemplate">
+    <div class="rule-row ras-rule">
+      <div class="rule-fields">
+        <label><span>تا رأس</span><input data-rule="maxRas" inputmode="decimal" placeholder="مثلاً ۶" /><b>ماه</b></label>
+        <label><span>نرخ شخصی</span><input data-rule="personalRate" inputmode="decimal" placeholder="۷" /><b>٪</b></label>
+        <label><span>نرخ سرمایه‌گذار</span><input data-rule="investorRate" inputmode="decimal" placeholder="۵" /><b>٪</b></label>
+      </div>
+      <button class="remove-rule" type="button" aria-label="حذف قاعده">×</button>
+    </div>
+  </template>
+
+  <template id="amountRuleTemplate">
+    <div class="rule-row amount-rule">
+      <div class="rule-fields amount-fields">
+        <label><span>از مبلغ</span><input data-rule="minAmount" inputmode="decimal" placeholder="مثلاً ۲۰۰۰" /><b>م</b></label>
+        <label><span>تغییر نرخ</span><input data-rule="adjustment" inputmode="decimal" placeholder="مثلاً -۰.۵" /><b>٪</b></label>
+      </div>
+      <button class="remove-rule" type="button" aria-label="حذف قاعده">×</button>
+    </div>
+  </template>
 
   <script src="./app.js" defer></script>
 </body>
