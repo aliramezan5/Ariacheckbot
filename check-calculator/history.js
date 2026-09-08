@@ -23,7 +23,7 @@
   const signature = x => [x.principal,x.count,x.interval,x.rate,x.rateMode,x.source].join('|');
   const id = () => (crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`);
 
-  document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="./history.css?v=1">');
+  document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="./history.css?v=2">');
   document.body.insertAdjacentHTML('beforeend', `
     <div id="historyOverlay" class="history-overlay" hidden></div>
     <aside id="historySheet" class="history-sheet" aria-hidden="true" aria-label="حافظه و تاریخچه">
@@ -55,8 +55,6 @@
   const el = Object.fromEntries(['historyOverlay','historySheet','historyClose','historyClear','historyCount','memoryCount','memorySection','memoryList','historyList','historyToast'].map(k => [k, document.getElementById(k)]));
   const bottom = document.getElementById('bottomSchedule');
   if (bottom) {
-    const span = bottom.querySelector('span');
-    if (span) span.textContent = 'تاریخچه';
     bottom.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5M12 7v5l3 2"/></svg><span>تاریخچه</span>`;
   }
 
@@ -187,6 +185,69 @@
   });
   if (bottom) bottom.addEventListener('click', open);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && el.historySheet.classList.contains('open')) close(); });
+
+  function ensureRateMonitor() {
+    const anchor = document.querySelector('#autoRatePanel .auto-rate-result');
+    if (!anchor || document.getElementById('rateLiveMonitor')) return;
+    anchor.insertAdjacentHTML('afterend', `
+      <div id="rateLiveMonitor" class="rate-live-monitor">
+        <div class="rate-live-top">
+          <span>مانیتور نرخ اتومات</span>
+          <b id="rateEngineStatus">در حال بررسی…</b>
+        </div>
+        <div class="rate-live-grid">
+          <div><span>نرخ نهایی</span><strong id="rateMonitorFinal">—</strong></div>
+          <div><span>رأس فعلی</span><strong id="rateMonitorRas">—</strong></div>
+        </div>
+        <p id="rateMonitorReason">—</p>
+        <small id="rateMonitorNext">—</small>
+      </div>`);
+  }
+
+  let lastRate = null;
+  function updateRateMonitor() {
+    ensureRateMonitor();
+    const box = document.getElementById('rateLiveMonitor');
+    const s = window.CheckCalc?.getCurrentSnapshot?.();
+    if (!box || !s) return;
+    box.hidden = s.rateMode !== 'auto';
+    if (box.hidden) return;
+
+    const modernEngine = /رأس/.test(String(s.reason || ''));
+    const status = document.getElementById('rateEngineStatus');
+    status.textContent = modernEngine ? 'موتور جدید فعال' : 'نسخه قدیمی فعال';
+    status.classList.toggle('warn', !modernEngine);
+
+    document.getElementById('rateMonitorFinal').textContent = `${faNumber(s.rate,2)}٪`;
+    document.getElementById('rateMonitorRas').textContent = `${faNumber(s.ras,1)} ماه`;
+    document.getElementById('rateMonitorReason').textContent = s.reason || '—';
+
+    let next = 'بالاترین بازه نرخ';
+    if (s.ras <= 3) next = 'مرز بعدی: رأس بیش از ۳ ماه';
+    else if (s.ras <= 6) next = 'مرز بعدی: رأس بیش از ۶ ماه';
+    else if (s.ras <= 9) next = 'مرز بعدی: رأس بیش از ۹ ماه';
+    else if (s.ras <= 12) next = 'مرز بعدی: رأس بیش از ۱۲ ماه';
+    document.getElementById('rateMonitorNext').textContent = next;
+
+    if (lastRate !== null && Number(lastRate) !== Number(s.rate)) {
+      box.classList.remove('rate-changed');
+      void box.offsetWidth;
+      box.classList.add('rate-changed');
+      setTimeout(() => box.classList.remove('rate-changed'), 700);
+    }
+    lastRate = s.rate;
+  }
+
+  ['input','change','click'].forEach(type => {
+    document.addEventListener(type, e => {
+      if (e.target.closest('#autoRatePanel, #principal, #count, #interval, [data-source], [data-rate-mode], [data-settings-rate-mode]')) {
+        requestAnimationFrame(updateRateMonitor);
+      }
+    }, true);
+  });
+  window.addEventListener('checkcalc:calculated', updateRateMonitor);
+  setTimeout(updateRateMonitor, 50);
+  setTimeout(updateRateMonitor, 500);
 
   window.CheckCalcHistory = { open, render, load };
   render();
