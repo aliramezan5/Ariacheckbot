@@ -1,4 +1,4 @@
-const CACHE = 'check-calculator-v2';
+const CACHE = 'check-calculator-v3-fintech';
 const ASSETS = ['./', './index.html', './styles.css', './app.js', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', event => {
   self.skipWaiting();
