@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="محاسبه چک" />
+  <title>محاسبه مبلغ چک</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icon.svg" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="app" aria-label="ماشین حساب چک اقساطی">
+    <header class="header">
+      <h1>محاسبه مبلغ چک</h1>
+      <p>کاهش مانده با سود مرکب</p>
+      <span class="rate">نرخ ماهانه: ۷٪</span>
+    </header>
+
+    <section class="form-card" aria-label="ورودی معامله">
+      <label class="field">
+        <span>مانده نقدی معامله</span>
+        <div class="input-wrap">
+          <input id="principal" inputmode="decimal" autocomplete="off" value="1200" aria-label="مانده نقدی معامله به میلیون تومان" />
+          <b>میلیون تومان</b>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>تعداد چک‌ها</span>
+        <div class="input-wrap compact">
+          <input id="count" inputmode="numeric" autocomplete="off" value="3" aria-label="تعداد چک‌ها" />
+          <b>فقره</b>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>فاصله بین هر چک</span>
+        <div class="input-wrap compact">
+          <input id="interval" inputmode="numeric" autocomplete="off" value="2" aria-label="فاصله چک‌ها به ماه" />
+          <b>ماه</b>
+        </div>
+      </label>
+
+      <button id="calculate" type="button">محاسبه</button>
+    </section>
+
+    <section id="resultCard" class="result-card" aria-live="polite">
+      <span class="result-label">مبلغ هر چک</span>
+      <div class="payment-line">
+        <strong id="payment">۵۲۱.۱۳۳</strong>
+        <span>میلیون تومان</span>
+      </div>
+      <button id="copy" type="button" class="copy-btn">کپی مبلغ هر چک</button>
+
+      <div class="summary">
+        <div>
+          <span>جمع کل چک‌ها</span>
+          <b id="total">۱٬۵۶۳.۳۹۸ م</b>
+        </div>
+        <div>
+          <span>سود کل</span>
+          <b id="profit">۳۶۳.۳۹۸ م</b>
+        </div>
+      </div>
+    </section>
+
+    <section class="schedule-card">
+      <div class="section-title">
+        <h2>برنامه چک‌ها</h2>
+        <span id="periodRate">نرخ هر دوره ۱۴.۴۹٪</span>
+      </div>
+      <div id="schedule" class="schedule"></div>
+    </section>
+
+    <p class="footnote">محاسبه بر مبنای سود مرکب ماهانه ۷٪ و کاهش مانده پس از هر قسط انجام می‌شود.</p>
+    <p id="error" class="error" role="alert" hidden></p>
+  </main>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
