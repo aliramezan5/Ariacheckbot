@@ -47,8 +47,19 @@ function setTheme(theme) {
   document.querySelectorAll('[data-theme]').forEach(b => b.classList.toggle('active', b.dataset.theme === settings.theme));
 }
 function applyScale() {
-  document.documentElement.style.setProperty('--font-scale', String(settings.fontScale / 100));
-  document.documentElement.style.setProperty('--ui-scale', String(settings.uiScale / 100));
+  const fontRatio = settings.fontScale / 100;
+  const uiRatio = settings.uiScale / 100;
+  const root = document.documentElement;
+  root.style.setProperty('--font-base', `${16 * fontRatio}px`);
+  root.style.setProperty('--app-max', `${460 * uiRatio}px`);
+  root.style.setProperty('--app-top', `${22 * uiRatio}px`);
+  root.style.setProperty('--app-x', `${16 * uiRatio}px`);
+  root.style.setProperty('--app-bottom', `${28 * uiRatio}px`);
+  root.style.setProperty('--header-gap', `${20 * uiRatio}px`);
+  root.style.setProperty('--form-gap', `${13 * uiRatio}px`);
+  root.style.setProperty('--input-h', `${58 * uiRatio}px`);
+  root.style.setProperty('--button-h', `${56 * uiRatio}px`);
+  root.style.setProperty('--result-gap', `${17 * uiRatio}px`);
   els.fontScale.value = settings.fontScale;
   els.uiScale.value = settings.uiScale;
   els.fontScaleLabel.textContent = `${faNumber(settings.fontScale,0)}٪`;
