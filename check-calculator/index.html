@@ -3,29 +3,46 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#ffffff" />
+  <meta name="theme-color" content="#07111f" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="محاسبه چک" />
-  <title>محاسبه مبلغ چک</title>
+  <title>محاسبه چک</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="apple-touch-icon" href="./icon.svg" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
   <main class="app" aria-label="ماشین حساب چک اقساطی">
     <header class="header">
-      <button id="settingsOpen" class="icon-btn" type="button" aria-label="تنظیمات">⚙︎</button>
-      <div>
-        <h1>محاسبه مبلغ چک</h1>
-        <p>کاهش مانده با سود مرکب</p>
+      <button id="settingsOpen" class="icon-btn glass-icon" type="button" aria-label="تنظیمات">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1A1.7 1.7 0 0 0 8.5 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.1 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H2v-4h.4A1.7 1.7 0 0 0 4.1 8a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 8.5 3.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V2h4v.1A1.7 1.7 0 0 0 15 3.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 8c.15.38.37.72.66 1 .3.28.7.42 1.1.4H22v4h-.84a1.7 1.7 0 0 0-1.1.4c-.29.28-.51.62-.66 1.2Z"/></svg>
+      </button>
+
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div>
+          <h1>محاسبه چک</h1>
+          <p>ساده، سریع، دقیق</p>
+        </div>
       </div>
+
       <span class="header-spacer" aria-hidden="true"></span>
     </header>
 
-    <section class="form-card" aria-label="ورودی معامله">
+    <div class="top-tabs" role="tablist" aria-label="نمای برنامه">
+      <button id="calcTab" class="active" type="button">محاسبه</button>
+      <button id="scheduleJump" type="button">جدول سررسیدها</button>
+    </div>
+
+    <section class="form-card glass-card" aria-label="ورودی معامله">
       <label class="field">
-        <span>مانده نقدی معامله</span>
+        <span class="field-title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v12H4z"/><path d="M7 7V5h10v2M8 12h8M8 15h5"/></svg>مانده نقدی معامله</span>
         <div class="input-wrap">
           <input id="principal" inputmode="decimal" autocomplete="off" value="1200" aria-label="مانده نقدی معامله به میلیون تومان" />
           <b>میلیون تومان</b>
@@ -34,7 +51,7 @@
 
       <div class="two-col">
         <label class="field">
-          <span>تعداد چک‌ها</span>
+          <span class="field-title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14v13H5z"/><path d="M8 3v6M16 3v6M5 10h14"/></svg>تعداد چک‌ها</span>
           <div class="input-wrap compact">
             <input id="count" inputmode="numeric" autocomplete="off" value="3" aria-label="تعداد چک‌ها" />
             <b>فقره</b>
@@ -42,7 +59,7 @@
         </label>
 
         <label class="field">
-          <span>فاصله هر چک</span>
+          <span class="field-title"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/></svg>فاصله هر چک</span>
           <div class="input-wrap compact">
             <input id="interval" inputmode="numeric" autocomplete="off" value="2" aria-label="فاصله چک‌ها به ماه" />
             <b>ماه</b>
@@ -68,12 +85,13 @@
             </div>
           </div>
           <div class="auto-rate-result">
+            <span class="rate-kicker">نرخ فعلی</span>
             <strong id="effectiveRate">۷٪</strong>
             <span id="rateReason">سرمایه شخصی</span>
           </div>
           <div class="deal-metrics">
-            <span>مدت <b id="durationMetric">۶ ماه</b></span>
-            <span>رأس <b id="rasMetric">۴ ماه</b></span>
+            <span>مدت معامله <b id="durationMetric">۶ ماه</b></span>
+            <span>رأس معامله <b id="rasMetric">۴ ماه</b></span>
           </div>
         </div>
 
@@ -88,34 +106,66 @@
         </div>
       </section>
 
-      <button id="calculate" type="button">محاسبه</button>
+      <button id="calculate" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M16 15h0M8 18h2M12 18h5"/></svg>
+        محاسبه
+      </button>
     </section>
 
     <section id="resultCard" class="result-card" aria-live="polite">
-      <span class="result-label">مبلغ هر چک</span>
+      <div class="result-topline">
+        <span class="result-label">مبلغ هر چک</span>
+        <button id="copy" type="button" class="copy-btn" aria-label="کپی مبلغ هر چک">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+        </button>
+      </div>
       <div class="payment-line">
         <strong id="payment">۵۲۱.۱۳۳</strong>
         <span>میلیون تومان</span>
       </div>
-      <button id="copy" type="button" class="copy-btn">کپی مبلغ هر چک</button>
-
-      <div class="summary">
-        <div><span>جمع کل چک‌ها</span><b id="total">۱٬۵۶۳.۳۹۸ م</b></div>
-        <div><span>سود کل</span><b id="profit">۳۶۳.۳۹۸ م</b></div>
-      </div>
     </section>
 
-    <section class="schedule-card">
+    <section class="metric-grid" aria-label="خلاصه محاسبه">
+      <div class="metric-card glass-card"><span>جمع کل چک‌ها</span><b id="total">۱٬۵۶۳.۳۹۸ م</b></div>
+      <div class="metric-card glass-card"><span>سود کل</span><b id="profit">۳۶۳.۳۹۸ م</b></div>
+      <div class="metric-card glass-card"><span>نرخ هر دوره</span><b id="periodRateMetric">۱۴.۴۹٪</b></div>
+      <div class="metric-card accent-metric"><span>نرخ ماهانه</span><b id="monthlyRateMetric">۷٪</b></div>
+    </section>
+
+    <section id="scheduleCard" class="schedule-card glass-card">
       <button id="scheduleToggle" class="section-title" type="button" aria-expanded="true">
-        <h2>برنامه چک‌ها</h2>
+        <span class="section-name"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14v13H5z"/><path d="M8 3v6M16 3v6M5 10h14"/></svg><h2>جدول سررسید چک‌ها</h2></span>
         <span id="periodRate">نرخ هر دوره ۱۴.۴۹٪</span>
       </button>
       <div id="schedule" class="schedule"></div>
     </section>
 
+    <details class="formula-card glass-card">
+      <summary><span>جزئیات محاسبه</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary>
+      <div class="formula-body">
+        <p>نرخ دوره از نرخ ماهانه و فاصله چک‌ها محاسبه می‌شود؛ سپس مبلغ اقساط مساوی بر اساس کاهش مانده به دست می‌آید.</p>
+        <code>A = P × i ÷ [1 − (1+i)<sup>−n</sup>]</code>
+      </div>
+    </details>
+
     <p class="footnote">محاسبه بر مبنای سود مرکب ماهانه و کاهش مانده پس از هر قسط انجام می‌شود.</p>
     <p id="error" class="error" role="alert" hidden></p>
   </main>
+
+  <nav class="bottom-nav" aria-label="ناوبری اصلی">
+    <button id="bottomSettings" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.5-2.4 1A8 8 0 0 0 15 6l-.3-2.6h-4L10.4 6A8 8 0 0 0 9 7L6.5 6 4.5 9.5l2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.5L9 17a8 8 0 0 0 1.4 1l.3 2.6h4L15 18a8 8 0 0 0 1.5-1l2.4 1 2-3.5-2-1.5a7 7 0 0 0 .1-1Z"/></svg>
+      <span>تنظیمات</span>
+    </button>
+    <button id="bottomCalc" class="active" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M16 15h0M8 18h2M12 18h5"/></svg>
+      <span>محاسبه</span>
+    </button>
+    <button id="bottomSchedule" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/></svg>
+      <span>سررسیدها</span>
+    </button>
+  </nav>
 
   <div id="settingsOverlay" class="overlay" hidden></div>
   <aside id="settingsSheet" class="settings-sheet" aria-hidden="true" aria-label="تنظیمات">
@@ -129,65 +179,58 @@
     <div class="settings-scroll">
       <section class="settings-section">
         <h3>نمایش</h3>
-        <div class="setting-row stacked">
-          <span>تم برنامه</span>
-          <div class="segmented full" role="group" aria-label="تم برنامه">
-            <button type="button" data-theme="light" class="active">روز</button>
-            <button type="button" data-theme="dark">شب</button>
+        <div class="setting-card">
+          <div class="setting-row stacked">
+            <span>تم برنامه</span>
+            <div class="segmented full theme-switch" role="group" aria-label="تم برنامه">
+              <button type="button" data-theme="light">روز</button>
+              <button type="button" data-theme="dark" class="active">شب</button>
+            </div>
           </div>
+          <label class="setting-row slider-row">
+            <span>اندازه فونت <b id="fontScaleLabel">۱۰۰٪</b></span>
+            <input id="fontScale" type="range" min="90" max="120" step="5" value="100" />
+          </label>
+          <label class="setting-row slider-row">
+            <span>اندازه برنامه <b id="uiScaleLabel">۱۰۰٪</b></span>
+            <input id="uiScale" type="range" min="90" max="110" step="5" value="100" />
+          </label>
         </div>
-        <label class="setting-row slider-row">
-          <span>اندازه فونت <b id="fontScaleLabel">۱۰۰٪</b></span>
-          <input id="fontScale" type="range" min="90" max="120" step="5" value="100" />
-        </label>
-        <label class="setting-row slider-row">
-          <span>اندازه برنامه <b id="uiScaleLabel">۱۰۰٪</b></span>
-          <input id="uiScale" type="range" min="90" max="110" step="5" value="100" />
-        </label>
       </section>
 
       <section class="settings-section">
         <h3>نرخ کارمزد</h3>
-        <div class="setting-row stacked">
-          <span>حالت محاسبه نرخ</span>
-          <div class="segmented full" role="group" aria-label="حالت نرخ در تنظیمات">
-            <button type="button" data-settings-rate-mode="auto" class="active">اتومات</button>
-            <button type="button" data-settings-rate-mode="manual">دستی</button>
+        <div class="setting-card">
+          <div class="setting-row stacked">
+            <span>حالت محاسبه نرخ</span>
+            <div class="segmented full" role="group" aria-label="حالت نرخ در تنظیمات">
+              <button type="button" data-settings-rate-mode="auto" class="active">اتومات</button>
+              <button type="button" data-settings-rate-mode="manual">دستی</button>
+            </div>
           </div>
         </div>
 
         <div class="base-rates">
-          <label>
-            <span>سرمایه شخصی</span>
-            <div class="mini-input"><input id="personalBaseRate" inputmode="decimal" value="7" /><b>٪</b></div>
-          </label>
-          <label>
-            <span>سرمایه‌گذار</span>
-            <div class="mini-input"><input id="investorBaseRate" inputmode="decimal" value="5" /><b>٪</b></div>
-          </label>
+          <label><span>سرمایه شخصی</span><div class="mini-input"><input id="personalBaseRate" inputmode="decimal" value="7" /><b>٪</b></div></label>
+          <label><span>سرمایه‌گذار</span><div class="mini-input"><input id="investorBaseRate" inputmode="decimal" value="5" /><b>٪</b></div></label>
         </div>
-        <p class="helper">این دو نرخ پایه قبلاً تعیین شده‌اند. موتور اتومات ابتدا منبع پول را اعمال می‌کند.</p>
+        <p class="helper">در حالت اتومات، سیستم ابتدا منبع پول و سپس قواعد رأس و مبلغ معامله را اعمال می‌کند.</p>
 
         <div class="rules-head">
-          <div>
-            <strong>قواعد اتومات رأس</strong>
-            <span>اختیاری؛ اگر تعریف شوند، نرخ پایه را جایگزین می‌کنند.</span>
-          </div>
+          <div><strong>قواعد رأس معامله</strong><span>برای بازه‌های مختلف رأس، نرخ جدا تعریف کن.</span></div>
           <button id="addRasRule" class="secondary-btn" type="button">+ قاعده</button>
         </div>
         <div id="rasRules" class="rules-list"></div>
 
         <div class="rules-head amount-rules-head">
-          <div>
-            <strong>قواعد مبلغ معامله</strong>
-            <span>اختیاری؛ برای مبلغ‌های خاص نرخ را تنظیم کن.</span>
-          </div>
+          <div><strong>قواعد مبلغ معامله</strong><span>برای مبلغ‌های خاص، نرخ را افزایش یا کاهش بده.</span></div>
           <button id="addAmountRule" class="secondary-btn" type="button">+ قاعده</button>
         </div>
         <div id="amountRules" class="rules-list"></div>
       </section>
 
       <button id="resetSettings" class="danger-btn" type="button">بازگشت تنظیمات به حالت اولیه</button>
+      <div class="version-note">نسخه Fintech UI</div>
     </div>
   </aside>
 
