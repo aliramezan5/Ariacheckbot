@@ -1,5 +1,5 @@
-const CACHE = 'check-calculator-v3-fintech';
-const ASSETS = ['./', './index.html', './styles.css', './app.js', './manifest.webmanifest', './icon.svg'];
+const CACHE = 'check-calculator-v4-history';
+const ASSETS = ['./', './index.html', './styles.css', './app.js', './history.js', './history.css', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
