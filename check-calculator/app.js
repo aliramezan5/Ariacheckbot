@@ -142,6 +142,33 @@ function validate(principal, count, interval, rate) {
   return '';
 }
 
+function getCurrentSnapshot() {
+  const principal = parseNumber(els.principal.value);
+  const count = parseNumber(els.count.value);
+  const interval = parseNumber(els.interval.value);
+  const { duration, ras } = getDealMetrics(count, interval);
+  const auto = getAutoRate(principal, ras);
+  const rate = settings.rateMode === 'auto' ? auto.rate : parseNumber(els.manualRate.value);
+  if (validate(principal, count, interval, rate)) return null;
+  const { periodRate, payment } = calculatePayment(principal, count, interval, rate);
+  const total = payment * count;
+  return {
+    principal,
+    count,
+    interval,
+    rate,
+    rateMode: settings.rateMode,
+    source: settings.source,
+    payment,
+    total,
+    profit: total - principal,
+    periodRate,
+    duration,
+    ras,
+    reason: settings.rateMode === 'auto' ? auto.reason : 'نرخ دستی',
+  };
+}
+
 function render() {
   const principal = parseNumber(els.principal.value);
   const count = parseNumber(els.count.value);
@@ -194,6 +221,21 @@ function restoreDeal() {
     if (saved.count) els.count.value = saved.count;
     if (saved.interval) els.interval.value = saved.interval;
   } catch (_) {}
+}
+
+function restoreFromHistory(item) {
+  if (!item) return;
+  els.principal.value = item.principal;
+  els.count.value = item.count;
+  els.interval.value = item.interval;
+  settings.source = item.source === 'investor' ? 'investor' : 'personal';
+  settings.rateMode = 'manual';
+  settings.manualRate = Number(item.rate) || settings.manualRate;
+  saveSettings();
+  syncSettingsControls();
+  render();
+  goTop();
+  setTimeout(() => els.resultCard.scrollIntoView({ behavior:'smooth', block:'center' }), 180);
 }
 
 function setRateMode(mode) {
@@ -259,9 +301,20 @@ function bindRuleRow(node, key, index) {
   });
 }
 
+function loadHistoryModule() {
+  const script = document.createElement('script');
+  script.src = './history.js?v=1';
+  script.async = true;
+  document.body.appendChild(script);
+}
+
 els.calculate.addEventListener('click', () => {
   render();
-  if (els.error.hidden) els.resultCard.scrollIntoView({ behavior:'smooth', block:'center' });
+  if (els.error.hidden) {
+    const snapshot = getCurrentSnapshot();
+    if (snapshot) window.dispatchEvent(new CustomEvent('checkcalc:calculated', { detail: snapshot }));
+    els.resultCard.scrollIntoView({ behavior:'smooth', block:'center' });
+  }
 });
 [els.principal,els.count,els.interval].forEach(input => {
   input.addEventListener('input', render);
@@ -322,7 +375,6 @@ els.scheduleToggle.addEventListener('click', () => {
   els.scheduleToggle.setAttribute('aria-expanded', String(!hide));
 });
 els.scheduleJump.addEventListener('click', goSchedule);
-els.bottomSchedule.addEventListener('click', goSchedule);
 els.bottomCalc.addEventListener('click', goTop);
 els.calcTab.addEventListener('click', goTop);
 els.copy.addEventListener('click', async () => {
@@ -336,9 +388,12 @@ els.copy.addEventListener('click', async () => {
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && els.settingsSheet.classList.contains('open')) closeSettings(); });
 
+window.CheckCalc = { getCurrentSnapshot, restoreFromHistory, render };
+
 restoreDeal();
 syncSettingsControls();
 render();
+loadHistoryModule();
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
