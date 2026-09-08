@@ -1,5 +1,6 @@
 const DEFAULTS = {
-  theme: 'light',
+  designVersion: 3,
+  theme: 'dark',
   fontScale: 100,
   uiScale: 100,
   rateMode: 'auto',
@@ -11,12 +12,14 @@ const DEFAULTS = {
   amountRules: [],
 };
 
-const els = Object.fromEntries([
-  'principal','count','interval','calculate','payment','total','profit','periodRate','schedule','copy','error','resultCard',
-  'effectiveRate','rateReason','durationMetric','rasMetric','autoRatePanel','manualRatePanel','manualRate','settingsOpen','settingsClose',
-  'settingsOverlay','settingsSheet','fontScale','uiScale','fontScaleLabel','uiScaleLabel','personalBaseRate','investorBaseRate','rasRules',
-  'amountRules','addRasRule','addAmountRule','resetSettings','scheduleToggle','rasRuleTemplate','amountRuleTemplate'
-].map(id => [id, document.getElementById(id)]));
+const ids = [
+  'principal','count','interval','calculate','payment','total','profit','periodRate','periodRateMetric','monthlyRateMetric',
+  'schedule','scheduleCard','copy','error','resultCard','effectiveRate','rateReason','durationMetric','rasMetric','autoRatePanel',
+  'manualRatePanel','manualRate','settingsOpen','settingsClose','settingsOverlay','settingsSheet','fontScale','uiScale',
+  'fontScaleLabel','uiScaleLabel','personalBaseRate','investorBaseRate','rasRules','amountRules','addRasRule','addAmountRule',
+  'resetSettings','scheduleToggle','rasRuleTemplate','amountRuleTemplate','scheduleJump','calcTab','bottomSettings','bottomCalc','bottomSchedule'
+];
+const els = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
 
 const faToEn = value => String(value ?? '')
   .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
@@ -32,39 +35,49 @@ let settings = loadSettings();
 function loadSettings() {
   try {
     const raw = JSON.parse(localStorage.getItem('checkCalc:settings:v2') || 'null');
-    return { ...DEFAULTS, ...(raw || {}), rasRules: raw?.rasRules || [], amountRules: raw?.amountRules || [] };
-  } catch (_) { return { ...DEFAULTS }; }
+    if (!raw) return { ...DEFAULTS };
+    const migrated = {
+      ...DEFAULTS,
+      ...raw,
+      designVersion: 3,
+      theme: raw.designVersion === 3 ? raw.theme : 'dark',
+      rasRules: raw.rasRules || [],
+      amountRules: raw.amountRules || [],
+    };
+    localStorage.setItem('checkCalc:settings:v2', JSON.stringify(migrated));
+    return migrated;
+  } catch (_) {
+    return { ...DEFAULTS };
+  }
 }
 function saveSettings() {
   localStorage.setItem('checkCalc:settings:v2', JSON.stringify(settings));
 }
 
 function setTheme(theme) {
-  settings.theme = theme === 'dark' ? 'dark' : 'light';
+  settings.theme = theme === 'light' ? 'light' : 'dark';
   document.documentElement.dataset.theme = settings.theme;
-  document.querySelector('meta[name="theme-color"]').setAttribute('content', settings.theme === 'dark' ? '#0d1624' : '#ffffff');
-  document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]').setAttribute('content', settings.theme === 'dark' ? 'black-translucent' : 'default');
+  const dark = settings.theme === 'dark';
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#07111f' : '#f5f8fc');
+  document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]').setAttribute('content', dark ? 'black-translucent' : 'default');
   document.querySelectorAll('[data-theme]').forEach(b => b.classList.toggle('active', b.dataset.theme === settings.theme));
 }
+
 function applyScale() {
   const fontRatio = settings.fontScale / 100;
   const uiRatio = settings.uiScale / 100;
   const root = document.documentElement;
   root.style.setProperty('--font-base', `${16 * fontRatio}px`);
   root.style.setProperty('--app-max', `${460 * uiRatio}px`);
-  root.style.setProperty('--app-top', `${22 * uiRatio}px`);
   root.style.setProperty('--app-x', `${16 * uiRatio}px`);
-  root.style.setProperty('--app-bottom', `${28 * uiRatio}px`);
-  root.style.setProperty('--header-gap', `${20 * uiRatio}px`);
-  root.style.setProperty('--form-gap', `${13 * uiRatio}px`);
-  root.style.setProperty('--input-h', `${58 * uiRatio}px`);
-  root.style.setProperty('--button-h', `${56 * uiRatio}px`);
-  root.style.setProperty('--result-gap', `${17 * uiRatio}px`);
+  root.style.setProperty('--app-top', `${18 * uiRatio}px`);
+  root.style.setProperty('--app-bottom', `${110 * uiRatio}px`);
   els.fontScale.value = settings.fontScale;
   els.uiScale.value = settings.uiScale;
   els.fontScaleLabel.textContent = `${faNumber(settings.fontScale,0)}٪`;
   els.uiScaleLabel.textContent = `${faNumber(settings.uiScale,0)}٪`;
 }
+
 function syncSettingsControls() {
   setTheme(settings.theme);
   applyScale();
@@ -98,7 +111,7 @@ function getAutoRate(principal, ras) {
     const candidate = settings.source === 'investor' ? Number(rasRule.investorRate) : Number(rasRule.personalRate);
     if (Number.isFinite(candidate) && candidate > 0) {
       rate = candidate;
-      reason += ` • قاعده رأس تا ${faNumber(Number(rasRule.maxRas),1)} ماه`;
+      reason += ` • رأس تا ${faNumber(Number(rasRule.maxRas),1)} ماه`;
     }
   }
 
@@ -158,6 +171,8 @@ function render() {
   els.total.textContent = `${faNumber(total,3)} م`;
   els.profit.textContent = `${faNumber(profit,3)} م`;
   els.periodRate.textContent = `نرخ هر دوره ${faNumber(periodRate * 100,2)}٪`;
+  els.periodRateMetric.textContent = `${faNumber(periodRate * 100,2)}٪`;
+  els.monthlyRateMetric.textContent = `${faNumber(rate,2)}٪`;
 
   els.schedule.replaceChildren();
   const fragment = document.createDocumentFragment();
@@ -183,8 +198,11 @@ function restoreDeal() {
 
 function setRateMode(mode) {
   settings.rateMode = mode === 'manual' ? 'manual' : 'auto';
-  saveSettings(); syncSettingsControls(); render();
+  saveSettings();
+  syncSettingsControls();
+  render();
 }
+
 function openSettings() {
   els.settingsOverlay.hidden = false;
   els.settingsSheet.classList.add('open');
@@ -195,7 +213,15 @@ function closeSettings() {
   els.settingsSheet.classList.remove('open');
   els.settingsSheet.setAttribute('aria-hidden','true');
   document.body.style.overflow = '';
-  setTimeout(() => { els.settingsOverlay.hidden = true; }, 220);
+  setTimeout(() => { els.settingsOverlay.hidden = true; }, 240);
+}
+function goSchedule() {
+  els.schedule.hidden = false;
+  els.scheduleToggle.setAttribute('aria-expanded','true');
+  els.scheduleCard.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+function goTop() {
+  window.scrollTo({ top:0, behavior:'smooth' });
 }
 
 function renderRules() {
@@ -221,49 +247,99 @@ function bindRuleRow(node, key, index) {
   node.querySelectorAll('input[data-rule]').forEach(input => {
     input.addEventListener('input', () => {
       settings[key][index][input.dataset.rule] = faToEn(input.value);
-      saveSettings(); render();
+      saveSettings();
+      render();
     });
   });
   node.querySelector('.remove-rule').addEventListener('click', () => {
-    settings[key].splice(index,1); saveSettings(); renderRules(); render();
+    settings[key].splice(index,1);
+    saveSettings();
+    renderRules();
+    render();
   });
 }
 
-els.calculate.addEventListener('click', () => { render(); if (els.error.hidden) els.resultCard.scrollIntoView({ behavior:'smooth', block:'center' }); });
+els.calculate.addEventListener('click', () => {
+  render();
+  if (els.error.hidden) els.resultCard.scrollIntoView({ behavior:'smooth', block:'center' });
+});
 [els.principal,els.count,els.interval].forEach(input => {
   input.addEventListener('input', render);
   input.addEventListener('keydown', e => { if (e.key === 'Enter') render(); });
 });
-els.manualRate.addEventListener('input', () => { settings.manualRate = parseNumber(els.manualRate.value); saveSettings(); render(); });
+els.manualRate.addEventListener('input', () => {
+  settings.manualRate = parseNumber(els.manualRate.value);
+  saveSettings();
+  render();
+});
 document.querySelectorAll('[data-rate-mode]').forEach(b => b.addEventListener('click', () => setRateMode(b.dataset.rateMode)));
 document.querySelectorAll('[data-settings-rate-mode]').forEach(b => b.addEventListener('click', () => setRateMode(b.dataset.settingsRateMode)));
 document.querySelectorAll('[data-source]').forEach(b => b.addEventListener('click', () => {
-  settings.source = b.dataset.source; saveSettings(); syncSettingsControls(); render();
+  settings.source = b.dataset.source;
+  saveSettings();
+  syncSettingsControls();
+  render();
 }));
-document.querySelectorAll('[data-theme]').forEach(b => b.addEventListener('click', () => { setTheme(b.dataset.theme); saveSettings(); }));
-els.fontScale.addEventListener('input', () => { settings.fontScale = clamp(Number(els.fontScale.value),90,120); applyScale(); saveSettings(); });
-els.uiScale.addEventListener('input', () => { settings.uiScale = clamp(Number(els.uiScale.value),90,110); applyScale(); saveSettings(); });
-els.personalBaseRate.addEventListener('input', () => { const v=parseNumber(els.personalBaseRate.value); if(Number.isFinite(v)&&v>0){ settings.personalBaseRate=v; saveSettings(); render(); }});
-els.investorBaseRate.addEventListener('input', () => { const v=parseNumber(els.investorBaseRate.value); if(Number.isFinite(v)&&v>0){ settings.investorBaseRate=v; saveSettings(); render(); }});
-els.addRasRule.addEventListener('click', () => { settings.rasRules.push({maxRas:'',personalRate:'',investorRate:''}); saveSettings(); renderRules(); });
-els.addAmountRule.addEventListener('click', () => { settings.amountRules.push({minAmount:'',adjustment:''}); saveSettings(); renderRules(); });
+document.querySelectorAll('[data-theme]').forEach(b => b.addEventListener('click', () => {
+  setTheme(b.dataset.theme);
+  saveSettings();
+}));
+els.fontScale.addEventListener('input', () => {
+  settings.fontScale = clamp(Number(els.fontScale.value),90,120);
+  applyScale(); saveSettings();
+});
+els.uiScale.addEventListener('input', () => {
+  settings.uiScale = clamp(Number(els.uiScale.value),90,110);
+  applyScale(); saveSettings();
+});
+els.personalBaseRate.addEventListener('input', () => {
+  const v = parseNumber(els.personalBaseRate.value);
+  if (Number.isFinite(v) && v > 0) { settings.personalBaseRate = v; saveSettings(); render(); }
+});
+els.investorBaseRate.addEventListener('input', () => {
+  const v = parseNumber(els.investorBaseRate.value);
+  if (Number.isFinite(v) && v > 0) { settings.investorBaseRate = v; saveSettings(); render(); }
+});
+els.addRasRule.addEventListener('click', () => {
+  settings.rasRules.push({maxRas:'',personalRate:'',investorRate:''});
+  saveSettings(); renderRules();
+});
+els.addAmountRule.addEventListener('click', () => {
+  settings.amountRules.push({minAmount:'',adjustment:''});
+  saveSettings(); renderRules();
+});
 els.resetSettings.addEventListener('click', () => {
-  settings = { ...DEFAULTS, rasRules:[], amountRules:[] }; saveSettings(); syncSettingsControls(); render();
+  settings = { ...DEFAULTS, rasRules:[], amountRules:[] };
+  saveSettings(); syncSettingsControls(); render();
 });
 els.settingsOpen.addEventListener('click', openSettings);
+els.bottomSettings.addEventListener('click', openSettings);
 els.settingsClose.addEventListener('click', closeSettings);
 els.settingsOverlay.addEventListener('click', closeSettings);
 els.scheduleToggle.addEventListener('click', () => {
-  const next = !els.schedule.hidden; els.schedule.hidden = next; els.scheduleToggle.setAttribute('aria-expanded', String(!next));
+  const hide = !els.schedule.hidden;
+  els.schedule.hidden = hide;
+  els.scheduleToggle.setAttribute('aria-expanded', String(!hide));
 });
+els.scheduleJump.addEventListener('click', goSchedule);
+els.bottomSchedule.addEventListener('click', goSchedule);
+els.bottomCalc.addEventListener('click', goTop);
+els.calcTab.addEventListener('click', goTop);
 els.copy.addEventListener('click', async () => {
   const text = `${els.payment.textContent} میلیون تومان`;
-  try { await navigator.clipboard.writeText(text); const prev=els.copy.textContent; els.copy.textContent='کپی شد'; setTimeout(()=>els.copy.textContent=prev,1000); }
-  catch (_) { els.copy.textContent=text; }
+  try {
+    await navigator.clipboard.writeText(text);
+    els.copy.classList.add('copied');
+    setTimeout(() => els.copy.classList.remove('copied'), 900);
+  } catch (_) {}
 });
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && els.settingsSheet.classList.contains('open')) closeSettings(); });
 
 restoreDeal();
 syncSettingsControls();
 render();
 
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+}
