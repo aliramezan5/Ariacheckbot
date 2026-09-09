@@ -4,16 +4,16 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'محاسبه چک | Cloud',
-  description: 'ماشین حساب اقساط با تاریخچه ابری روی Vercel',
-  applicationName: 'محاسبه چک',
+  title: 'Ariacheckbot | ماشین‌حساب معامله خودرو',
+  description: 'محاسبه اقساط، کارمزد، رأس و جدول بازپرداخت معاملات خودرو',
+  applicationName: 'Ariacheckbot',
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#07111f',
+  themeColor: '#f4f7fb',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
