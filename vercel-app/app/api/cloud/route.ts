@@ -6,7 +6,8 @@ export const runtime = 'nodejs';
 export const preferredRegion = 'fra1';
 
 const TTL_SECONDS = 60 * 60 * 24 * 30;
-const cache = getCache({ namespace: 'aria-check-cloud-v1' });
+const cache = getCache();
+const KEY_PREFIX = 'aria-check-cloud-v1:';
 
 type Profile = { id: string; name: string; phone?: string; note?: string; createdAt: string; updatedAt: string };
 type Deal = { id: string; profileId?: string; customerName?: string; title?: string; principal: number; count: number; interval: number; monthlyRate: number; payment: number; total: number; profit: number; rasMonths: number; durationMonths: number; createdAt: string; updatedAt: string; pinned?: boolean };
@@ -19,6 +20,7 @@ function syncKey(request: Request) {
   if (!/^[A-Za-z0-9_-]{24,128}$/.test(raw)) throw new Error('کلید همگام‌سازی معتبر نیست');
   return createHash('sha256').update(raw).digest('hex');
 }
+function cacheKey(hash: string) { return `${KEY_PREFIX}state:${hash}`; }
 function text(value: unknown, max: number) { return typeof value === 'string' ? value.trim().slice(0, max) : ''; }
 function finite(value: unknown, fallback = 0) { const n = Number(value); return Number.isFinite(n) ? n : fallback; }
 function sanitizeProfile(value: unknown): Profile | null {
@@ -47,7 +49,7 @@ export async function GET(request: Request) {
   const started = Date.now();
   try {
     const key = syncKey(request);
-    const data = await cache.get(`state:${key}`) as CloudState | undefined;
+    const data = await cache.get(cacheKey(key)) as CloudState | undefined;
     const state = data ? sanitizeState(data) : emptyState();
     console.log(JSON.stringify({ level: 'info', msg: 'cloud_read', route: '/api/cloud', ms: Date.now() - started, deals: state.deals.length, profiles: state.profiles.length }));
     return NextResponse.json({ state, storage: 'Vercel Runtime Cache', durable: false }, { headers: { 'Cache-Control': 'no-store' } });
@@ -62,7 +64,7 @@ export async function PUT(request: Request) {
     const key = syncKey(request);
     const body = await request.json();
     const state = sanitizeState(body?.state);
-    await cache.set(`state:${key}`, state, { ttl: TTL_SECONDS, tags: [`aria-check-user:${key.slice(0, 16)}`], name: 'aria-check-cloud-state' });
+    await cache.set(cacheKey(key), state, { ttl: TTL_SECONDS, tags: [`aria-check-user:${key.slice(0, 16)}`], name: 'aria-check-cloud-state' });
     console.log(JSON.stringify({ level: 'info', msg: 'cloud_write', route: '/api/cloud', ms: Date.now() - started, deals: state.deals.length, profiles: state.profiles.length }));
     return NextResponse.json({ ok: true, state, storage: 'Vercel Runtime Cache', durable: false });
   } catch (error) {
@@ -71,6 +73,6 @@ export async function PUT(request: Request) {
   }
 }
 export async function DELETE(request: Request) {
-  try { const key = syncKey(request); await cache.delete(`state:${key}`); return NextResponse.json({ ok: true }); }
+  try { const key = syncKey(request); await cache.delete(cacheKey(key)); return NextResponse.json({ ok: true }); }
   catch (error) { const message = error instanceof Error ? error.message : 'خطای پاک کردن حافظه ابری'; return NextResponse.json({ error: message }, { status: 400 }); }
 }
